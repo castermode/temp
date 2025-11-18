@@ -1,0 +1,650 @@
+diff --git a/Makefile b/Makefile
+index 14098f00..63a09c70 100644
+--- a/Makefile
++++ b/Makefile
+@@ -13,7 +13,7 @@ install:
+ install_all:
+ 	pip install ruff==0.6.9 groq together boto3 litellm ollama chromadb weaviate weaviate-client sentence_transformers vertexai \
+ 	            google-generativeai elasticsearch opensearch-py vecs "pinecone<7.0.0" pinecone-text faiss-cpu langchain-community \
+-							upstash-vector azure-search-documents langchain-memgraph langchain-neo4j langchain-aws rank-bm25 pymochow pymongo psycopg kuzu databricks-sdk valkey
++							upstash-vector azure-search-documents langchain-memgraph langchain-neo4j langchain-aws rank-bm25 pymochow pymongo psycopg kuzu databricks-sdk valkey tablestore-for-agent-memory
+ 
+ # Format code with ruff
+ format:
+diff --git a/docs/components/vectordbs/dbs/aliyun_tablestore.mdx b/docs/components/vectordbs/dbs/aliyun_tablestore.mdx
+new file mode 100644
+index 00000000..092a01c3
+--- /dev/null
++++ b/docs/components/vectordbs/dbs/aliyun_tablestore.mdx
+@@ -0,0 +1,73 @@
++---
++title: Aliyun Tablestore vector_store
++---
++
++[Aliyun Tablestore](https://www.aliyun.com/product/ots) Tablestore provides Serverless table storage services for massive structured data, and provides a one-stop IoTstore solution for deep optimization of IoT scenarios. It is suitable for structured data storage in scenarios such as massive bills, IM messages, IoT, Internet of Vehicles, risk control, and recommendations, and provides low-cost storage of massive data, millisecond-level online data query and retrieval, and flexible data analysis capabilities.
++
++### Installation
++
++Aliyun Tablestore support requires additional dependencies. Install them with:
++
++```bash
++pip install tablestore-for-agent-memory
++```
++
++### Prerequisites
++
++Before using Aliyun Tablestore with Mem0, you need to get TABLESTORE_ACCESS_KEY_ID and TABLESTORE_ACCESS_KEY_SECRET, then set up a tablestore instance in Aliyun.
++
++### Usage
++
++```python
++import os
++from mem0 import Memory
++
++config = {
++    "vector_store": {
++        "provider": "aliyun_tablestore",
++        "config": {
++            "vector_dimension": 1536,
++            "endpoint": "<your_endpoint>",
++            "instance_name": "<your_instance_name>",
++            "access_key_id": "<your_access_key_id>",
++            "access_key_secret": "<your_access_key_secret>",
++        }
++    }
++}
++
++m = Memory.from_config(config)
++messages = [
++    {"role": "user", "content": "I'm planning to watch a movie tonight. Any recommendations?"},
++    {"role": "assistant", "content": "How about a thriller movie? They can be quite engaging."},
++    {"role": "user", "content": "I'm not a big fan of thriller movies but I love sci-fi movies."},
++    {"role": "assistant", "content": "Got it! I'll avoid thriller recommendations and suggest sci-fi movies in the future."}
++]
++m.add(messages, user_id="alice", metadata={"category": "movies"})
++```
++
++### Config
++
++#### Available Parameters
++
++Here are the available parameters for the `aliyun_tablestore` config:
++
++| Parameter | Description | Default Value |
++| --- | --- | --- |
++| `endpoint` | endpoint of aliyun tablestore | Required |
++| `instance_name` | instance_name of aliyun tablestore | Required |
++| `access_key_id` | access_key_id of aliyun tablestore | Required |
++| `access_key_secret` | access_key_secret of aliyun tablestore | Required |
++| `vector_dimension` | dimension of vector | `1536` |
++| `collection_name` | name of the collection | `mem0` |
++| `search_index_name` | index name | `mem0_search_index` |
++| `text_field` | name of the text in table field | `text` |
++| `embedding_field` | name of the embedding field | `embedding` |
++| `vector_metric_type` | metric type for vector | `VM_COSINE` |
++
++#### Distance Metrics
++
++The following distance metrics are supported:
++
++- `VM_EUCLIDEAN`: Euclidean Distance
++- `VM_COSINE`: Cosine Similarity
++- `VM_DOT_PRODUCT`: Dot Product
+\ No newline at end of file
+diff --git a/docs/components/vectordbs/overview.mdx b/docs/components/vectordbs/overview.mdx
+index 15494e61..00679ccc 100644
+--- a/docs/components/vectordbs/overview.mdx
++++ b/docs/components/vectordbs/overview.mdx
+@@ -34,6 +34,7 @@ See the list of supported vector databases below.
+   <Card title="LangChain" href="/components/vectordbs/dbs/langchain"></Card>
+   <Card title="Amazon S3 Vectors" href="/components/vectordbs/dbs/s3_vectors"></Card>
+   <Card title="Databricks" href="/components/vectordbs/dbs/databricks"></Card>
++  <Card title="AliyunTableStore" href="/components/vectordbs/dbs/aliyun_tablestore"></Card>
+ </CardGroup>
+ 
+ ## Usage
+diff --git a/docs/docs.json b/docs/docs.json
+index bb0ad7ff..57f95d66 100644
+--- a/docs/docs.json
++++ b/docs/docs.json
+@@ -173,7 +173,8 @@
+ 															"components/vectordbs/dbs/baidu",
+ 															"components/vectordbs/dbs/s3_vectors",
+ 															"components/vectordbs/dbs/databricks",
+-															"components/vectordbs/dbs/neptune_analytics"
++															"components/vectordbs/dbs/neptune_analytics",
++                                                            "components/vectordbs/dbs/aliyun_tablestore"
+ 														]
+ 													}
+ 												]
+diff --git a/mem0/configs/vector_stores/aliyun_tablestore.py b/mem0/configs/vector_stores/aliyun_tablestore.py
+new file mode 100644
+index 00000000..cf815b13
+--- /dev/null
++++ b/mem0/configs/vector_stores/aliyun_tablestore.py
+@@ -0,0 +1,31 @@
++from typing import Any, Dict, Optional
++
++from pydantic import BaseModel, Field, model_validator
++
++class AliyunTableStoreConfig(BaseModel):
++    endpoint: str = Field(description="endpoint of tablestore")
++    instance_name: str = Field(description="instance_name of tablestore")
++    access_key_id: str = Field(description="access_key_id of tablestore")
++    access_key_secret: str = Field(description="access_key_secret of tablestore")
++    vector_dimension: int = Field(1536, description="dimension of vector")
++    collection_name: Optional[str] = Field("mem0", description="name of the collection")
++    search_index_name: Optional[str] = Field("mem0_search_index", description="index name")
++    text_field: Optional[str] = Field("text", description="name of the text in table field")
++    embedding_field: Optional[str] = Field("embedding", description="name of the embedding field")
++    vector_metric_type: Optional[str] = Field("VM_COSINE", description="metric type for vector")
++
++    @model_validator(mode="before")
++    @classmethod
++    def validate_extra_fields(cls, values: Dict[str, Any]) -> Dict[str, Any]:
++        allowed_fields = set(cls.model_fields.keys())
++        input_fields = set(values.keys())
++        extra_fields = input_fields - allowed_fields
++        if extra_fields:
++            raise ValueError(
++                f"Extra fields not allowed: {', '.join(extra_fields)}. Please input only the following fields: {', '.join(allowed_fields)}"
++            )
++        return values
++
++    model_config = {
++        "arbitrary_types_allowed": True,
++    }
+diff --git a/mem0/utils/factory.py b/mem0/utils/factory.py
+index 5aa98a15..f62400d7 100644
+--- a/mem0/utils/factory.py
++++ b/mem0/utils/factory.py
+@@ -184,6 +184,7 @@ class VectorStoreFactory:
+         "s3_vectors": "mem0.vector_stores.s3_vectors.S3Vectors",
+         "baidu": "mem0.vector_stores.baidu.BaiduDB",
+         "neptune": "mem0.vector_stores.neptune_analytics.NeptuneAnalyticsVector",
++        "aliyun_tablestore": "mem0.vector_stores.aliyun_tablestore.AliyunTableStore",
+     }
+ 
+     @classmethod
+diff --git a/mem0/vector_stores/aliyun_tablestore.py b/mem0/vector_stores/aliyun_tablestore.py
+new file mode 100644
+index 00000000..fbf070ef
+--- /dev/null
++++ b/mem0/vector_stores/aliyun_tablestore.py
+@@ -0,0 +1,215 @@
++import json
++import logging
++
++from mem0.vector_stores.base import VectorStoreBase
++from typing import Any, Optional, Dict
++
++import tablestore
++from tablestore_for_agent_memory.knowledge.knowledge_store import KnowledgeStore
++from tablestore_for_agent_memory.base.base_knowledge_store import Document
++from tablestore_for_agent_memory.base.filter import Filters
++
++logger = logging.getLogger(__name__)
++
++class OutputData:
++    def __init__(self, document: Document, score=None, metadata_name='payload'):
++        self._metadata_name = metadata_name
++        self.id: Optional[str] = document.document_id # memory id
++        self.score: Optional[float] = score  # distance
++        self.payload: Optional[Dict] = self._metadata2payload(document.metadata)  # metadata
++        self.payload['data'] = document.text
++
++    def _metadata2payload(self, metadata):
++        return json.loads(metadata[f'{self._metadata_name}_source'])
++
++metric_str2metric_type_dict = {
++    "VM_EUCLIDEAN": tablestore.VectorMetricType.VM_EUCLIDEAN,
++    "VM_COSINE": tablestore.VectorMetricType.VM_COSINE,
++    "VM_DOT_PRODUCT": tablestore.VectorMetricType.VM_DOT_PRODUCT,
++}
++
++class AliyunTableStore(VectorStoreBase):
++    def __init__(
++            self,
++            endpoint: str,
++            instance_name: str,
++            access_key_id: str,
++            access_key_secret: str,
++            vector_dimension: int,
++            collection_name: Optional[str] = "mem0",
++            search_index_name: Optional[str] = "mem0_search_index",
++            text_field: Optional[str] = "text",
++            embedding_field: Optional[str] = "embedding",
++            vector_metric_type: str = "VM_COSINE",
++            **kwargs: Any,
++    ):
++        self._tablestore_client = tablestore.OTSClient(
++            end_point=endpoint,
++            access_key_id=access_key_id,
++            access_key_secret=access_key_secret,
++            instance_name=instance_name,
++            retry_policy=tablestore.WriteRetryPolicy(),
++        )
++
++        self._vector_dimension = vector_dimension
++        self._collection_name = collection_name
++        self._search_index_name = search_index_name
++        self._metadata_name = 'payload'
++        self._key_value_hyphen = '='
++        self._search_index_schema = [
++            tablestore.FieldSchema(
++                self._metadata_name,
++                tablestore.FieldType.KEYWORD,
++                index=True,
++                is_array=True,
++                enable_sort_and_agg=True,
++            ),
++            tablestore.FieldSchema(
++                f'{self._metadata_name}_source',
++                tablestore.FieldType.KEYWORD,
++                index=False,
++                is_array=False,
++                enable_sort_and_agg=False,
++            )
++        ]
++        self._text_field = text_field
++        self._embedding_field = embedding_field
++        self._vector_metric_type = metric_str2metric_type_dict[vector_metric_type]
++
++        self._knowledge_store = KnowledgeStore(
++            tablestore_client=self._tablestore_client,
++            vector_dimension=self._vector_dimension,
++            enable_multi_tenant=False,
++            table_name=self._collection_name,
++            search_index_name=self._search_index_name,
++            search_index_schema=self._search_index_schema,
++            text_field=self._text_field,
++            embedding_field=self._embedding_field,
++            vector_metric_type=self._vector_metric_type,
++            **kwargs,
++        )
++
++        self.create_col(**kwargs)
++
++    def create_col(self, **kwargs: Any):
++        """Create a new collection."""
++        if self._collection_name in self.list_cols():
++            logger.warning(f"tablestore table:[{self._collection_name}] already exists")
++            return
++        self._knowledge_store.init_table()
++
++    def _payload2metadata(self, payload: Dict):
++        payload_ = json.dumps([f'{key}{self._key_value_hyphen}{value}' for key, value in payload.items()], ensure_ascii=False)
++        return {
++            self._metadata_name: payload_,
++            f'{self._metadata_name}_source': json.dumps(payload, ensure_ascii=False),
++        }
++
++    def insert(self, vectors: list, payloads: list = None, ids: list = None):
++        """Insert vectors into a collection."""
++        payloads_ = payloads if payloads is not None else []
++        documents = []
++
++        for id, vector, payload in zip(ids, vectors, payloads_):
++            payload_ = payload.copy() if payload is not None else {}
++            documents.append(
++                Document(
++                    document_id=id,
++                    text=payload_.pop('data')
++                    if 'data' in payload_.keys()
++                    else None,
++                    embedding=vector,
++                    metadata=self._payload2metadata(payload_),
++                )
++            )
++
++        for document in documents:
++            self._knowledge_store.put_document(document)
++
++    def _create_filter(self, filters: dict):
++        """Create filters from dict (format of mem0 filters)"""
++        if filters is None:
++            return None
++
++        if len(filters.keys()) == 1:
++            meta_key, meta_value = tuple(filters.items())[0]
++            return Filters.eq(self._metadata_name, f'{meta_key}{self._key_value_hyphen}{meta_value}')
++
++        return Filters.logical_and(
++            [
++                Filters.eq(self._metadata_name, f'{meta_key}{self._key_value_hyphen}{meta_value}')
++                for meta_key, meta_value in filters.items()
++            ]
++        )
++
++    def search(self, query, vectors, limit=5, filters=None):
++        """Search for similar vectors."""
++        response = self._knowledge_store.vector_search(
++            query_vector=vectors,
++            top_k=limit,
++            metadata_filter=self._create_filter(filters),
++        )
++        return [
++            OutputData(
++                document=hit.document,
++                score=hit.score,
++                metadata_name=self._metadata_name,
++            )
++            for hit in response.hits
++        ]
++
++    def delete(self, vector_id):
++        """Delete a vector by ID."""
++        self._knowledge_store.delete_document(document_id=vector_id)
++
++    def update(self, vector_id, vector=None, payload=None):
++        """Update a vector and its payload."""
++        payload_ = payload.copy() if payload is not None else {}
++        document_for_update = Document(
++            document_id=vector_id,
++            text=payload_.pop('data')
++                 if 'data' in payload_.keys()
++                 else None,
++            embedding=vector,
++            metadata=self._payload2metadata(payload_),
++        )
++        self._knowledge_store.update_document(document_for_update)
++
++    def get(self, vector_id):
++        """Retrieve a vector by ID."""
++        document = self._knowledge_store.get_document(document_id=vector_id)
++        return OutputData(
++            document=document,
++            metadata_name=self._metadata_name,
++        )
++
++    def list_cols(self):
++        """List all collections."""
++        return self._tablestore_client.list_table()
++
++    def delete_col(self):
++        """Delete a collection."""
++        self._tablestore_client.delete_search_index(table_name=self._collection_name, index_name=self._search_index_name)
++        self._tablestore_client.delete_table(table_name=self._collection_name)
++
++    def col_info(self):
++        """Get information about a collection."""
++        self._tablestore_client.describe_table(table_name=self._collection_name)
++
++    def list(self, filters=None, limit=100):
++        """List all memories."""
++        return [
++            [
++                OutputData(
++                    document=hit.document,
++                    metadata_name=self._metadata_name,
++                )
++                for hit in self._knowledge_store.search_documents(metadata_filter=self._create_filter(filters), limit=limit).hits
++            ]
++        ]
++
++    def reset(self):
++        """Reset by delete the collection and recreate it."""
++        logger.warning(f"Resetting table {self._collection_name}...")
++        self.delete_col()
++        self.create_col()
+\ No newline at end of file
+diff --git a/mem0/vector_stores/configs.py b/mem0/vector_stores/configs.py
+index 42edf53a..054719ca 100644
+--- a/mem0/vector_stores/configs.py
++++ b/mem0/vector_stores/configs.py
+@@ -33,6 +33,7 @@ class VectorStoreConfig(BaseModel):
+         "faiss": "FAISSConfig",
+         "langchain": "LangchainConfig",
+         "s3_vectors": "S3VectorsConfig",
++        "aliyun_tablestore": "AliyunTableStoreConfig",
+     }
+ 
+     @model_validator(mode="after")
+diff --git a/pyproject.toml b/pyproject.toml
+index 26b7069d..11e25687 100644
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -55,6 +55,7 @@ vector_stores = [
+     "elasticsearch>=8.0.0,<9.0.0",
+     "pymilvus>=2.4.0,<2.6.0",
+     "langchain-aws>=0.2.23",
++    "tablestore-for-agent-memory>=1.0.1",
+ ]
+ llms = [
+     "groq>=0.3.0",
+diff --git a/tests/vector_stores/test_aliyun_tablestore.py b/tests/vector_stores/test_aliyun_tablestore.py
+new file mode 100644
+index 00000000..d54240bf
+--- /dev/null
++++ b/tests/vector_stores/test_aliyun_tablestore.py
+@@ -0,0 +1,230 @@
++import os
++import random
++
++import uuid
++
++import pytest
++
++from tablestore_for_agent_memory.util.tablestore_helper import TablestoreHelper
++
++from mem0.vector_stores.aliyun_tablestore import AliyunTableStore, OutputData
++
++@pytest.fixture
++def aliyun_tablestore_instance():
++    return AliyunTableStore(
++        endpoint=os.environ["TABLESTORE_ENDPOINT"],
++        instance_name=os.environ["TABLESTORE_INSTANCE_NAME"],
++        access_key_id=os.environ["TABLESTORE_ACCESS_KEY_ID"],
++        access_key_secret=os.environ["TABLESTORE_ACCESS_KEY_SECRET"],
++        vector_dimension=4,
++        collection_name='test_collection',
++        search_index_name='test_search_index',
++    )
++
++def wait_for_index_ready(aliyun_tablestore_instance: AliyunTableStore, length):
++    TablestoreHelper.wait_search_index_ready(
++        tablestore_client=aliyun_tablestore_instance._tablestore_client,
++        table_name=aliyun_tablestore_instance._collection_name,
++        index_name=aliyun_tablestore_instance._search_index_name,
++        total_count=length,
++    )
++
++@pytest.fixture
++def data():
++    vectors = [[0.1, 0.2, 0.3, 0.4]]
++    payloads = [{"data": "aaa", "role": "user"}]
++    ids = ["id1"]
++    return vectors, payloads, ids
++
++def random_data():
++    vector = [random.random() for _ in range(4)]
++    rand_text = " ".join(
++        random.choices(
++            ["abc", "def", "ghi", "abcd", "adef", "abcgh", "apple", "banana", "cherry"], k=random.randint(1, 10)
++        )
++    )
++    rand_role = random.choices(["user", "assistant"])[0]
++    payload = {"data": rand_text, "role": rand_role}
++    id = str(uuid.uuid4())
++    return vector, payload, id
++
++def batch_data(length: int):
++    vectors = []
++    payloads = []
++    ids = []
++    for _ in range(length):
++        vector, payload, id = random_data()
++        vectors.append(vector)
++        payloads.append(payload)
++        ids.append(id)
++    return vectors, payloads, ids
++
++def test_init(aliyun_tablestore_instance):
++    assert aliyun_tablestore_instance._collection_name in aliyun_tablestore_instance.list_cols()
++
++def test_list(aliyun_tablestore_instance):
++    length = 100
++
++    vectors, payloads, ids = batch_data(length)
++    aliyun_tablestore_instance.insert(vectors=vectors, payloads=payloads, ids=ids)
++
++    # 等待索引表准备完毕，防止出现不在预期内结果
++    wait_for_index_ready(aliyun_tablestore_instance, length)
++
++    outputs = aliyun_tablestore_instance.list()[0]
++    assert len(outputs) == length
++
++    user_count = 0
++    for payload in payloads:
++        if payload["role"] == "user":
++            user_count += 1
++
++    user_filters = {'role': 'user'}
++
++    outputs = aliyun_tablestore_instance.list(filters=user_filters)[0]
++    assert all(
++        [
++            output.payload["role"] == "user"
++            for output in outputs
++        ]
++    )
++    assert len(outputs) == user_count
++
++    half_length = length // 2
++    outputs = aliyun_tablestore_instance.list(limit=half_length)[0]
++    assert len(outputs) == half_length
++
++    half_user_count = user_count // 2
++    outputs = aliyun_tablestore_instance.list(filters=user_filters, limit=half_user_count)[0]
++    assert all(
++        [
++            output.payload["role"] == "user"
++            for output in outputs
++        ]
++    )
++    assert len(outputs) == half_user_count
++
++    # reset防止影响其他用例
++    aliyun_tablestore_instance.reset()
++
++def test_insert_and_reset(aliyun_tablestore_instance, data):
++    vectors, payloads, ids = data
++
++    aliyun_tablestore_instance.insert(vectors=vectors, payloads=payloads, ids=ids)
++    wait_for_index_ready(aliyun_tablestore_instance, len(ids))
++    outputs = aliyun_tablestore_instance.list()[0]
++
++    assert len(outputs) == 1
++    assert isinstance(outputs[0], OutputData)
++
++    assert outputs[0].id == ids[0]
++    assert outputs[0].payload == payloads[0]
++
++    aliyun_tablestore_instance.reset()
++    assert aliyun_tablestore_instance._collection_name in aliyun_tablestore_instance.list_cols()
++
++    wait_for_index_ready(aliyun_tablestore_instance, 0)
++    outputs = aliyun_tablestore_instance.list()[0]
++    assert len(outputs) == 0
++
++    length = 100
++    vectors, payloads, ids = batch_data(length)
++    aliyun_tablestore_instance.insert(vectors=vectors, payloads=payloads, ids=ids)
++
++    wait_for_index_ready(aliyun_tablestore_instance, length)
++    outputs = aliyun_tablestore_instance.list()[0]
++    assert len(outputs) == length
++
++    aliyun_tablestore_instance.reset()
++
++def test_delete(aliyun_tablestore_instance, data):
++    vectors, payloads, ids = data
++    aliyun_tablestore_instance.insert(vectors=vectors, payloads=payloads, ids=ids)
++
++    aliyun_tablestore_instance.delete(ids[0])
++
++    wait_for_index_ready(aliyun_tablestore_instance, 0)
++    outputs = aliyun_tablestore_instance.list()[0]
++    assert len(outputs) == 0
++
++def test_update(aliyun_tablestore_instance, data):
++    vectors, payloads, ids = data
++    aliyun_tablestore_instance.insert(vectors=vectors, payloads=payloads, ids=ids)
++
++    update_payload = {"data": "bbb", "role": "user"}
++
++    aliyun_tablestore_instance.update(vector_id=ids[0], payload=update_payload)
++    wait_for_index_ready(aliyun_tablestore_instance, len(ids))
++    outputs = aliyun_tablestore_instance.list()[0]
++
++    assert outputs[0].payload == update_payload
++
++    aliyun_tablestore_instance.delete(ids[0])
++
++def test_get(aliyun_tablestore_instance, data):
++    vectors, payloads, ids = data
++    aliyun_tablestore_instance.insert(vectors=vectors, payloads=payloads, ids=ids)
++
++    output = aliyun_tablestore_instance.get(ids[0])
++    assert output.payload == payloads[0]
++
++    aliyun_tablestore_instance.delete(ids[0])
++
++def test_delete_col_and_create_col(aliyun_tablestore_instance):
++    aliyun_tablestore_instance.delete_col()
++    assert aliyun_tablestore_instance._collection_name not in aliyun_tablestore_instance.list_cols()
++
++    aliyun_tablestore_instance.create_col()
++    assert aliyun_tablestore_instance._collection_name in aliyun_tablestore_instance.list_cols()
++
++def test_search(aliyun_tablestore_instance):
++    length = 100
++    vectors, payloads, ids = batch_data(length)
++    aliyun_tablestore_instance.insert(vectors=vectors, payloads=payloads, ids=ids)
++
++    idx = random.choices(range(len(vectors)))[0]
++    query_vector, query_payload, id = vectors[idx], payloads[idx], ids[idx]
++
++    outputs = aliyun_tablestore_instance.get(id)
++    assert outputs.payload == query_payload
++
++    # 等待索引表准备完毕，防止出现不在预期内结果
++    wait_for_index_ready(aliyun_tablestore_instance, length)
++
++    limit_num = 5
++    outputs = aliyun_tablestore_instance.search(query=query_payload["data"], vectors=query_vector, limit=limit_num)
++    assert id in [output.id for output in outputs]
++
++    half_limit_num = limit_num // 2
++    outputs = aliyun_tablestore_instance.search(query=query_payload["data"], vectors=query_vector, limit=half_limit_num)
++    assert len(outputs) == half_limit_num
++
++    user_filters = {'role': 'user'}
++    outputs = aliyun_tablestore_instance.search(query=query_payload["data"], vectors=query_vector, limit=limit_num, filters=user_filters)
++    assert all(
++        [
++            output.payload["role"] == "user"
++            for output in outputs
++        ]
++    )
++    assert len(outputs) == limit_num
++
++    outputs = aliyun_tablestore_instance.search(query=query_payload["data"], vectors=query_vector, limit=half_limit_num, filters=user_filters)
++    assert all(
++        [
++            output.payload["role"] == "user"
++            for output in outputs
++        ]
++    )
++    assert len(outputs) == half_limit_num
++
++    aliyun_tablestore_instance.reset()
++
++
++
++
++
++
++
++
++
