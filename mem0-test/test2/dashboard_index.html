@@ -1,0 +1,1339 @@
+<!-- 
+
+编写代码，实现一个web页面，展示dashboard_server.py的查询结果
+
+使用html+css+javascript实现
+使用 ajax 请求 dashboard_server.py 的查询结果
+
+页面从上到下分为 6 个部分：
+
+第一个部分：展示 "kemem dashboard"
+
+第二个部分：展示 sqlite 查询结果
+接口数据示例：
+curl http://127.0.0.1:8888/query/db
+{"success":true,"count":6,"data":[{"id":"4af52f75-8374-41ce-9950-475b3b0711d2","memory_id":"3633a14d-a133-4cec-954e-e1c8fcfff657","old_memory":null,"new_memory":"橘子富含营养","event":"ADD","created_at":"2025-11-10T01:17:48.096066-08:00","updated_at":null,"is_deleted":0,"actor_id":null,"role":null},{"id":"2c6cb1ba-23d4-4cec-8957-6ea4dbe4a329","memory_id":"948929fe-3783-4632-95a1-ba4d1f4f72cb","old_memory":null,"new_memory":"喜欢吃橘子","event":"ADD","created_at":"2025-11-10T01:17:48.091644-08:00","updated_at":null,"is_deleted":0,"actor_id":null,"role":null},{"id":"30dd35e3-d309-4967-bdc3-325fc6163403","memory_id":"fd900668-1fed-4eef-9a80-3bd18a05cdb3","old_memory":null,"new_memory":"喜欢吃香蕉","event":"ADD","created_at":"2025-11-10T01:17:42.508086-08:00","updated_at":null,"is_deleted":0,"actor_id":null,"role":null},{"id":"b1536858-c47e-47fe-a7ba-3856f72dd1f4","memory_id":"9783a0e2-6273-418d-a20e-d58289383700","old_memory":null,"new_memory":"苹果很甜","event":"ADD","created_at":"2025-11-10T01:17:36.986940-08:00","updated_at":null,"is_deleted":0,"actor_id":null,"role":null},{"id":"89dba432-7bb2-4c91-927d-47a80daba4f6","memory_id":"8367001d-f349-41e6-85d2-d5ad41c14393","old_memory":null,"new_memory":"喜欢吃苹果","event":"ADD","created_at":"2025-11-10T01:17:36.984254-08:00","updated_at":null,"is_deleted":0,"actor_id":null,"role":null},{"id":"deab2c76-e5e9-466e-b21a-3bd805eef498","memory_id":"8367001d-f349-41e6-85d2-d5ad41c14393","old_memory":"喜欢吃苹果","new_memory":null,"event":"DELETE","created_at":null,"updated_at":null,"is_deleted":1,"actor_id":null,"role":null}]}
+
+
+第三个部分，展示 向量数据库查询结果
+接口数据示例：
+curl http://127.0.0.1:8888/query/vectordb
+{"success":true,"count":4,"collection_info":{"name":1536,"points_count":4,"vectors_count":null},"data":[{"id":"3633a14d-a133-4cec-954e-e1c8fcfff657","payload":{"user_id":"user_001","data":"橘子富含营养","hash":"e390cef06dd982772f7e189f694461a7","created_at":"2025-11-10T01:17:48.096066-08:00"}},{"id":"948929fe-3783-4632-95a1-ba4d1f4f72cb","payload":{"user_id":"user_001","data":"喜欢吃橘子","hash":"439fe21480d5552cfd8056c26cd6f0b3","created_at":"2025-11-10T01:17:48.091644-08:00"}},{"id":"9783a0e2-6273-418d-a20e-d58289383700","payload":{"user_id":"user_001","data":"苹果很甜","hash":"72882b81533eb182c5998d6f13199fe8","created_at":"2025-11-10T01:17:36.986940-08:00"}},{"id":"fd900668-1fed-4eef-9a80-3bd18a05cdb3","payload":{"user_id":"user_001","data":"喜欢吃香蕉","hash":"553cb759b0671e815b97f3aa5df02887","created_at":"2025-11-10T01:17:42.508086-08:00"}}]}%
+
+
+第四部分，展示 图数据库查询结果
+接口数据示例：
+curl http://127.0.0.1:8888/query/graphdb
+{"success":true,"nodes_count":10,"relationships_count":5,"data":{"nodes":[{"id":null,"user_id":"user_001","name":"user_id:_user_001","mentions":2,"created":"2025-11-10 09:15:26.130000"},{"id":"1","user_id":"user_001","name":"苹果","mentions":5,"created":"2025-11-10 09:15:26.130000"},{"id":"2","user_id":"user_001","name":"甜","mentions":1,"created":"2025-11-10 09:15:26.847000"},{"id":"3","user_id":"user_001","name":"我","mentions":2,"created":"2025-11-10 09:17:39.232000"},{"id":"4","user_id":"user_001","name":"很甜","mentions":1,"created":"2025-11-10 09:17:39.912000"},{"id":"5","user_id":"user_001","name":"香蕉","mentions":2,"created":"2025-11-10 09:17:44.277000"},{"id":"6","user_id":"user_001","name":"能量","mentions":1,"created":"2025-11-10 09:17:44.809000"},{"id":"7","user_id":"user_001","name":"橘子","mentions":2,"created":"2025-11-10 09:17:49.488000"},{"id":"8","user_id":"user_001","name":"营养","mentions":1,"created":"2025-11-10 09:17:50.114000"},{"id":"9","user_id":"user_001","name":"user_001","mentions":1,"created":"2025-11-10 09:17:53.767000"}],"relationships":[{"source":"user_id:_user_001","relationship":"likes","destination":"橘子","mentions":1,"created":"2025-11-10 09:17:49.488000","updated":null},{"source":"我","relationship":"likes","destination":"香蕉","mentions":1,"created":"2025-11-10 09:17:44.277000","updated":null},{"source":"香蕉","relationship":"has","destination":"能量","mentions":1,"created":"2025-11-10 09:17:44.809000","updated":null},{"source":"橘子","relationship":"contains","destination":"营养","mentions":1,"created":"2025-11-10 09:17:50.114000","updated":null},{"source":"user_001","relationship":"dislikes","destination":"苹果","mentions":1,"created":"2025-11-10 09:17:53.767000","updated":null}]}}%
+
+第五部分，将第四部分图数据库的结果通过图谱展示出来
+
+第六部分，展示用户画像。展示的内容为 “用户1画像；用户2画像；用户3画像”，不需要调用后端接口，直接展示静态内容“用户1画像；用户2画像；用户3画像”就行
+
+-->
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KeMem Dashboard</title>
+    <!-- Vis.js 网络图库 -->
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* 第一部分：标题 */
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            color: #667eea;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* 第二部分：SQLite 查询结果 */
+        .section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .refresh-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .refresh-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .stats {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            flex: 1;
+            min-width: 150px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-card .label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 1.2em;
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #c33;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            color: #333;
+        }
+
+        tr:hover {
+            background: #f8f9ff;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .badge-add {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-delete {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge-update {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .text-muted {
+            color: #999;
+            font-style: italic;
+        }
+
+        .text-truncate {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .timestamp {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        /* 第三、第四部分 */
+        .placeholder-section {
+            background: white;
+            border-radius: 15px;
+            padding: 60px 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .placeholder-section h2 {
+            font-size: 3em;
+            color: #667eea;
+            font-weight: 700;
+        }
+
+        /* 第五部分：图谱可视化 */
+        #graph-visualization {
+            width: 100%;
+            height: 600px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: #fafafa;
+            position: relative;
+        }
+
+        .graph-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .graph-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .graph-btn:hover {
+            background: #5568d3;
+            transform: translateY(-1px);
+        }
+
+        .graph-btn.secondary {
+            background: #764ba2;
+        }
+
+        .graph-btn.secondary:hover {
+            background: #653a91;
+        }
+
+        .graph-legend {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9ff;
+            border-radius: 8px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #333;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .section {
+                padding: 20px;
+            }
+
+            .stat-card {
+                min-width: 100%;
+            }
+
+            table {
+                font-size: 0.9em;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 第一部分：标题 -->
+        <div class="header">
+            <h1>🧠 KeMem Dashboard</h1>
+        </div>
+
+        <!-- 第二部分：SQLite 查询结果 -->
+        <div class="section">
+            <div class="section-title">
+                <span>📊 Memory History</span>
+                <button class="refresh-btn" onclick="loadData()">🔄 刷新数据</button>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="label">总记录数</div>
+                    <div class="value" id="total-count">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">ADD 事件</div>
+                    <div class="value" id="add-count">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">DELETE 事件</div>
+                    <div class="value" id="delete-count">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">UPDATE 事件</div>
+                    <div class="value" id="update-count">-</div>
+                </div>
+            </div>
+
+            <div id="data-container">
+                <div class="loading">⏳ 正在加载数据...</div>
+            </div>
+        </div>
+
+        <!-- 第三部分：向量数据库查询结果 -->
+        <div class="section">
+            <div class="section-title">
+                <span>🔮 Vector</span>
+                <button class="refresh-btn" onclick="loadVectorData()">🔄 刷新数据</button>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="label">向量总数</div>
+                    <div class="value" id="vector-total-count">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">集合点数</div>
+                    <div class="value" id="vector-points-count">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">向量维度</div>
+                    <div class="value" id="vector-dimension">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">用户数据</div>
+                    <div class="value" id="vector-user-count">-</div>
+                </div>
+            </div>
+
+            <div id="vector-data-container">
+                <div class="loading">⏳ 正在加载数据...</div>
+            </div>
+        </div>
+
+        <!-- 第四部分：图数据库查询结果 -->
+        <div class="section">
+            <div class="section-title">
+                <span>🕸️ Graph</span>
+                <button class="refresh-btn" onclick="loadGraphData()">🔄 刷新数据</button>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="label">节点总数</div>
+                    <div class="value" id="graph-nodes-count">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">关系总数</div>
+                    <div class="value" id="graph-relationships-count">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">实体数</div>
+                    <div class="value" id="graph-entities-count">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">连接数</div>
+                    <div class="value" id="graph-connections-count">-</div>
+                </div>
+            </div>
+
+            <div id="graph-data-container">
+                <div class="loading">⏳ 正在加载图数据...</div>
+            </div>
+        </div>
+
+        <!-- 第五部分：图谱可视化 -->
+        <div class="section">
+            <div class="section-title">
+                <span>🎨 知识图谱可视化</span>
+                <button class="refresh-btn" onclick="loadGraphVisualization()">🔄 刷新图谱</button>
+            </div>
+
+            <div class="graph-controls">
+                <button class="graph-btn" onclick="fitGraphView()">📍 适应视图</button>
+                <button class="graph-btn" onclick="resetGraphPhysics()">🔄 重新布局</button>
+                <button class="graph-btn secondary" onclick="togglePhysics()">⚙️ 切换物理引擎</button>
+                <button class="graph-btn secondary" onclick="exportGraphImage()">📸 导出图片</button>
+            </div>
+
+            <div id="graph-vis-container">
+                <div id="graph-visualization">
+                    <div class="loading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                        ⏳ 正在加载图谱...
+                    </div>
+                </div>
+            </div>
+
+            <div class="graph-legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #97C2FC;"></div>
+                    <span>实体节点</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #FB7E81;"></div>
+                    <span>用户节点</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #7BE141;"></div>
+                    <span>likes 关系</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #FFA807;"></div>
+                    <span>dislikes 关系</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #6E6EFD;"></div>
+                    <span>其他关系</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第六部分：用户画像 -->
+        <div class="section">
+            <div class="section-title">
+                <span>👤 用户画像</span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
+                <!-- 用户1画像 -->
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; padding: 25px; color: white; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);">
+                    <h3 style="margin-bottom: 15px; font-size: 1.5em; border-bottom: 2px solid rgba(255, 255, 255, 0.3); padding-bottom: 10px;">
+                        👤 用户Caroline画像
+                    </h3>
+                    <pre style="white-space: pre-wrap; margin: 0; font-family: 'Consolas', 'Monaco', 'Courier New', monospace; line-height: 1.6; font-size: 0.95em; background: rgba(0, 0, 0, 0.1); border-radius: 8px; padding: 15px; overflow-x: auto;">{
+  "name": "Caroline",
+  "gender_identity": "女性，跨性别者",
+  "age_group": "年轻成人（20-30岁）",
+  "occupation_status": "积极探索职业方向，倾向于心理健康或咨询类工作",
+  "personality_traits": [
+    "有勇气",
+    "富有同理心",
+    "开放包容"
+  ],
+  "interests": [
+    "LGBTQ 社区支持",
+    "心理健康",
+    "自我成长",
+    "艺术（绘画）"
+  ],
+  "values": [
+    "接纳和包容",
+    "自我表达",
+    "支持多元性"
+  ],
+  "life_status": "积极寻求自我认同与成长，参与支持团体，注重个人情感和心理健康",
+  "social_traits": "善于表达，重视社交支持，愿意分享自己的经历",
+  "topics_of_interest": [
+    "LGBTQ 权益",
+    "心理健康",
+    "自我认同",
+    "艺术表达"
+  ],
+  "personal_goals": [
+    "成为心理咨询师或相关专业人士",
+    "继续学习自我接纳与表达",
+    "积极参与支持社区"
+  ]
+}</pre>
+                </div>
+
+                <!-- 用户2画像 -->
+                <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 12px; padding: 25px; color: white; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);">
+                    <h3 style="margin-bottom: 15px; font-size: 1.5em; border-bottom: 2px solid rgba(255, 255, 255, 0.3); padding-bottom: 10px;">
+                        👤 用户Melanie画像
+                    </h3>
+                    <pre style="white-space: pre-wrap; margin: 0; font-family: 'Consolas', 'Monaco', 'Courier New', monospace; line-height: 1.6; font-size: 0.95em; background: rgba(0, 0, 0, 0.1); border-radius: 8px; padding: 15px; overflow-x: auto;">{
+  "name": "Melanie",
+  "gender_identity": "女性",
+  "age_group": "中年（30-40岁）",
+  "occupation_status": "家庭主妇，兼具艺术爱好者，可能从事兼职或自由职业",
+  "personality_traits": [
+    "有创造力",
+    "关心家庭",
+    "善于表达感受"
+  ],
+  "interests": [
+    "绘画与艺术",
+    "家庭生活",
+    "自我放松与娱乐",
+    "孩子教育"
+  ],
+  "values": [
+    "家庭价值",
+    "创造性表达",
+    "平衡生活"
+  ],
+  "life_status": "平衡家庭和个人兴趣，注重自我表达和情感放松",
+  "social_traits": "温和、善于沟通，重视家庭关系与朋友交流",
+  "topics_of_interest": [
+    "艺术创作",
+    "家庭生活",
+    "自我表达",
+    "孩子教育"
+  ],
+  "personal_goals": [
+    "继续提升绘画技巧",
+    "保持家庭与个人兴趣的平衡",
+    "通过艺术实现自我表达"
+  ]
+}</pre>
+                </div>
+
+                <!-- 用户3画像 -->
+                <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); border-radius: 12px; padding: 25px; color: white; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);">
+                    <h3 style="margin-bottom: 15px; font-size: 1.5em; border-bottom: 2px solid rgba(255, 255, 255, 0.3); padding-bottom: 10px;">
+                        👤 用户Bruce画像
+                    </h3>
+                    <pre style="white-space: pre-wrap; margin: 0; font-family: 'Consolas', 'Monaco', 'Courier New', monospace; line-height: 1.6; font-size: 0.95em; background: rgba(0, 0, 0, 0.1); border-radius: 8px; padding: 15px; overflow-x: auto;">{
+  "name": "Bruce",
+  "gender_identity": "男性",
+  "age_group": "中年（35-45岁）",
+  "occupation_status": "高中数学教师，从事教育工作10余年",
+  "personality_traits": [
+    "逻辑思维强",
+    "有耐心",
+    "认真负责",
+    "善于引导"
+  ],
+  "interests": [
+    "数学研究",
+    "教育方法探索",
+    "数学竞赛辅导",
+    "阅读教育类书籍"
+  ],
+  "values": [
+    "教育公平",
+    "知识传播",
+    "逻辑思维培养",
+    "因材施教"
+  ],
+  "life_status": "专注于教学工作，致力于提升教学质量，关注学生的数学思维发展",
+  "social_traits": "善于讲解，耐心倾听学生问题，注重与学生和家长的沟通",
+  "topics_of_interest": [
+    "数学教育方法",
+    "学生思维培养",
+    "教学创新",
+    "数学竞赛"
+  ],
+  "personal_goals": [
+    "帮助更多学生建立数学自信",
+    "探索更有效的教学方法",
+    "培养出数学竞赛获奖学生",
+    "成为优秀的数学教育工作者"
+  ]
+}</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API 配置
+        const API_BASE_URL = 'http://127.0.0.1:8888';
+
+        // 页面加载时自动获取数据
+        window.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            loadVectorData();
+            loadGraphData();
+            loadGraphVisualization();
+        });
+
+        // 全局变量：保存网络图实例
+        let networkInstance = null;
+        let graphDataCache = null;
+        let physicsEnabled = true;
+
+        // 加载数据
+        async function loadData() {
+            const container = document.getElementById('data-container');
+            container.innerHTML = '<div class="loading">⏳ 正在加载数据...</div>';
+
+            try {
+                // 发送 AJAX 请求
+                const response = await fetch(`${API_BASE_URL}/query/db`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success && result.data) {
+                    updateStats(result.data);
+                    renderTable(result.data);
+                } else {
+                    throw new Error('数据格式错误');
+                }
+            } catch (error) {
+                console.error('获取数据失败:', error);
+                container.innerHTML = `
+                    <div class="error">
+                        ❌ 加载数据失败: ${error.message}
+                        <br><br>
+                        请确保：
+                        <ul style="margin-top: 10px; margin-left: 20px;">
+                            <li>dashboard_server.py 已启动（运行: python dashboard_server.py）</li>
+                            <li>服务器地址正确（${API_BASE_URL}）</li>
+                            <li>数据库文件存在</li>
+                        </ul>
+                    </div>
+                `;
+            }
+        }
+
+        // 更新统计信息
+        function updateStats(data) {
+            const totalCount = data.length;
+            const addCount = data.filter(item => item.event === 'ADD').length;
+            const deleteCount = data.filter(item => item.event === 'DELETE').length;
+            const updateCount = data.filter(item => item.event === 'UPDATE').length;
+
+            document.getElementById('total-count').textContent = totalCount;
+            document.getElementById('add-count').textContent = addCount;
+            document.getElementById('delete-count').textContent = deleteCount;
+            document.getElementById('update-count').textContent = updateCount;
+        }
+
+        // 渲染表格
+        function renderTable(data) {
+            const container = document.getElementById('data-container');
+
+            if (data.length === 0) {
+                container.innerHTML = '<div class="loading">📭 暂无数据</div>';
+                return;
+            }
+
+            let html = `
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Memory ID</th>
+                                <th>事件类型</th>
+                                <th>旧记忆</th>
+                                <th>新记忆</th>
+                                <th>创建时间</th>
+                                <th>状态</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            data.forEach(item => {
+                const eventBadge = getEventBadge(item.event);
+                const statusBadge = item.is_deleted ? '<span class="badge badge-delete">已删除</span>' : '<span class="badge badge-add">正常</span>';
+                
+                html += `
+                    <tr>
+                        <td><span class="text-truncate" title="${item.id}">${item.id.substring(0, 8)}...</span></td>
+                        <td><span class="text-truncate" title="${item.memory_id}">${item.memory_id ? item.memory_id.substring(0, 8) + '...' : '-'}</span></td>
+                        <td>${eventBadge}</td>
+                        <td>${item.old_memory ? `<span class="text-truncate" title="${item.old_memory}">${item.old_memory}</span>` : '<span class="text-muted">无</span>'}</td>
+                        <td>${item.new_memory ? `<span class="text-truncate" title="${item.new_memory}">${item.new_memory}</span>` : '<span class="text-muted">无</span>'}</td>
+                        <td><span class="timestamp">${formatDateTime(item.created_at)}</span></td>
+                        <td>${statusBadge}</td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        // 获取事件类型徽章
+        function getEventBadge(event) {
+            switch (event) {
+                case 'ADD':
+                    return '<span class="badge badge-add">ADD</span>';
+                case 'DELETE':
+                    return '<span class="badge badge-delete">DELETE</span>';
+                case 'UPDATE':
+                    return '<span class="badge badge-update">UPDATE</span>';
+                default:
+                    return `<span class="badge">${event}</span>`;
+            }
+        }
+
+        // 格式化日期时间
+        function formatDateTime(dateStr) {
+            if (!dateStr) return '-';
+            
+            try {
+                const date = new Date(dateStr);
+                return date.toLocaleString('zh-CN', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+            } catch (e) {
+                return dateStr;
+            }
+        }
+
+        // ========== 向量数据库相关函数 ==========
+
+        // 加载向量数据库数据
+        async function loadVectorData() {
+            const container = document.getElementById('vector-data-container');
+            container.innerHTML = '<div class="loading">⏳ 正在加载向量数据...</div>';
+
+            try {
+                // 发送 AJAX 请求
+                const response = await fetch(`${API_BASE_URL}/query/vectordb`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success && result.data) {
+                    updateVectorStats(result);
+                    renderVectorTable(result.data);
+                } else {
+                    throw new Error('数据格式错误');
+                }
+            } catch (error) {
+                console.error('获取向量数据失败:', error);
+                container.innerHTML = `
+                    <div class="error">
+                        ❌ 加载向量数据失败: ${error.message}
+                        <br><br>
+                        请确保：
+                        <ul style="margin-top: 10px; margin-left: 20px;">
+                            <li>dashboard_server.py 已启动</li>
+                            <li>向量数据库文件存在</li>
+                            <li>Qdrant 客户端已安装</li>
+                        </ul>
+                    </div>
+                `;
+            }
+        }
+
+        // 更新向量数据库统计信息
+        function updateVectorStats(result) {
+            const totalCount = result.count || 0;
+            const pointsCount = result.collection_info?.points_count || 0;
+            const dimension = result.collection_info?.name || '-';
+            
+            // 统计不同用户
+            const userSet = new Set();
+            if (result.data) {
+                result.data.forEach(item => {
+                    if (item.payload && item.payload.user_id) {
+                        userSet.add(item.payload.user_id);
+                    }
+                });
+            }
+
+            document.getElementById('vector-total-count').textContent = totalCount;
+            document.getElementById('vector-points-count').textContent = pointsCount;
+            document.getElementById('vector-dimension').textContent = dimension;
+            document.getElementById('vector-user-count').textContent = userSet.size;
+        }
+
+        // 渲染向量数据库表格
+        function renderVectorTable(data) {
+            const container = document.getElementById('vector-data-container');
+
+            if (data.length === 0) {
+                container.innerHTML = '<div class="loading">📭 暂无向量数据</div>';
+                return;
+            }
+
+            let html = `
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>向量 ID</th>
+                                <th>用户 ID</th>
+                                <th>记忆内容</th>
+                                <th>Hash</th>
+                                <th>创建时间</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            data.forEach(item => {
+                const payload = item.payload || {};
+                const userId = payload.user_id || '-';
+                const memoryData = payload.data || '-';
+                const hash = payload.hash || '-';
+                const createdAt = payload.created_at || '-';
+                
+                html += `
+                    <tr>
+                        <td><span class="text-truncate" title="${item.id}">${item.id.substring(0, 8)}...</span></td>
+                        <td><span class="badge badge-update">${userId}</span></td>
+                        <td><span class="text-truncate" title="${memoryData}">${memoryData}</span></td>
+                        <td><span class="text-truncate" title="${hash}" style="font-family: monospace; font-size: 0.85em;">${hash.substring(0, 12)}...</span></td>
+                        <td><span class="timestamp">${formatDateTime(createdAt)}</span></td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        // ========== 图数据库相关函数 ==========
+
+        // 加载图数据库数据
+        async function loadGraphData() {
+            const container = document.getElementById('graph-data-container');
+            container.innerHTML = '<div class="loading">⏳ 正在加载图数据...</div>';
+
+            try {
+                // 发送 AJAX 请求
+                const response = await fetch(`${API_BASE_URL}/query/graphdb`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success && result.data) {
+                    updateGraphStats(result);
+                    renderGraphTables(result.data);
+                } else {
+                    throw new Error('数据格式错误');
+                }
+            } catch (error) {
+                console.error('获取图数据失败:', error);
+                container.innerHTML = `
+                    <div class="error">
+                        ❌ 加载图数据失败: ${error.message}
+                        <br><br>
+                        请确保：
+                        <ul style="margin-top: 10px; margin-left: 20px;">
+                            <li>dashboard_server.py 已启动</li>
+                            <li>图数据库文件存在</li>
+                            <li>Kuzu 客户端已安装</li>
+                        </ul>
+                    </div>
+                `;
+            }
+        }
+
+        // 更新图数据库统计信息
+        function updateGraphStats(result) {
+            const nodesCount = result.nodes_count || 0;
+            const relationshipsCount = result.relationships_count || 0;
+            
+            // 统计实体数（排除用户节点）
+            const entitiesCount = result.data.nodes ? 
+                result.data.nodes.filter(node => !node.name.startsWith('user_id:')).length : 0;
+            
+            // 连接数就是关系数
+            const connectionsCount = relationshipsCount;
+
+            document.getElementById('graph-nodes-count').textContent = nodesCount;
+            document.getElementById('graph-relationships-count').textContent = relationshipsCount;
+            document.getElementById('graph-entities-count').textContent = entitiesCount;
+            document.getElementById('graph-connections-count').textContent = connectionsCount;
+        }
+
+        // 渲染图数据库表格
+        function renderGraphTables(data) {
+            const container = document.getElementById('graph-data-container');
+
+            if (!data.nodes || !data.relationships) {
+                container.innerHTML = '<div class="loading">📭 暂无图数据</div>';
+                return;
+            }
+
+            let html = '';
+
+            // 节点表格
+            if (data.nodes.length > 0) {
+                html += `
+                    <h3 style="margin-top: 20px; margin-bottom: 15px; color: #667eea; font-size: 1.3em;">
+                        🔵 节点 (Nodes)
+                    </h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>节点 ID</th>
+                                    <th>用户 ID</th>
+                                    <th>节点名称</th>
+                                    <th>提及次数</th>
+                                    <th>创建时间</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+
+                data.nodes.forEach(node => {
+                    const nodeId = node.id || '-';
+                    const userId = node.user_id || '-';
+                    const name = node.name || '-';
+                    const mentions = node.mentions || 0;
+                    const created = node.created || '-';
+                    
+                    // 为用户节点添加特殊样式
+                    const isUserNode = name.startsWith('user_id:');
+                    const nameDisplay = isUserNode ? 
+                        `<span class="badge badge-update">${name}</span>` : 
+                        `<span class="badge badge-add">${name}</span>`;
+                    
+                    html += `
+                        <tr>
+                            <td><span style="font-family: monospace;">${nodeId}</span></td>
+                            <td><span class="text-truncate">${userId}</span></td>
+                            <td>${nameDisplay}</td>
+                            <td><span class="badge" style="background: #e3f2fd; color: #1565c0;">${mentions}</span></td>
+                            <td><span class="timestamp">${formatDateTime(created)}</span></td>
+                        </tr>
+                    `;
+                });
+
+                html += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+
+            // 关系表格
+            if (data.relationships.length > 0) {
+                html += `
+                    <h3 style="margin-top: 30px; margin-bottom: 15px; color: #667eea; font-size: 1.3em;">
+                        🔗 关系 (Relationships)
+                    </h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>源节点</th>
+                                    <th>关系类型</th>
+                                    <th>目标节点</th>
+                                    <th>提及次数</th>
+                                    <th>创建时间</th>
+                                    <th>更新时间</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+
+                data.relationships.forEach(rel => {
+                    const source = rel.source || '-';
+                    const relationship = rel.relationship || '-';
+                    const destination = rel.destination || '-';
+                    const mentions = rel.mentions || 0;
+                    const created = rel.created || '-';
+                    const updated = rel.updated || '-';
+                    
+                    // 根据关系类型设置不同颜色
+                    const relationshipBadge = getRelationshipBadge(relationship);
+                    
+                    html += `
+                        <tr>
+                            <td><span class="badge badge-add">${source}</span></td>
+                            <td>${relationshipBadge}</td>
+                            <td><span class="badge badge-add">${destination}</span></td>
+                            <td><span class="badge" style="background: #e3f2fd; color: #1565c0;">${mentions}</span></td>
+                            <td><span class="timestamp">${formatDateTime(created)}</span></td>
+                            <td><span class="timestamp">${updated === '-' ? updated : formatDateTime(updated)}</span></td>
+                        </tr>
+                    `;
+                });
+
+                html += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+
+            if (data.nodes.length === 0 && data.relationships.length === 0) {
+                html = '<div class="loading">📭 暂无图数据</div>';
+            }
+
+            container.innerHTML = html;
+        }
+
+        // 获取关系类型徽章
+        function getRelationshipBadge(relationship) {
+            const relationshipColors = {
+                'likes': { bg: '#d4edda', color: '#155724' },      // 绿色
+                'dislikes': { bg: '#f8d7da', color: '#721c24' },   // 红色
+                'has': { bg: '#d1ecf1', color: '#0c5460' },        // 蓝色
+                'contains': { bg: '#fff3cd', color: '#856404' },   // 黄色
+                'knows': { bg: '#e2e3e5', color: '#383d41' },      // 灰色
+            };
+
+            const color = relationshipColors[relationship] || { bg: '#e7e7e7', color: '#333' };
+            
+            return `<span class="badge" style="background: ${color.bg}; color: ${color.color}; font-weight: 600;">
+                ${relationship}
+            </span>`;
+        }
+
+        // ========== 图谱可视化相关函数 ==========
+
+        // 加载图谱可视化
+        async function loadGraphVisualization() {
+            const container = document.getElementById('graph-visualization');
+            
+            try {
+                // 显示加载状态
+                container.innerHTML = '<div class="loading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">⏳ 正在加载图谱...</div>';
+
+                // 获取图数据
+                const response = await fetch(`${API_BASE_URL}/query/graphdb`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success && result.data) {
+                    graphDataCache = result.data;
+                    renderGraphVisualization(result.data);
+                } else {
+                    throw new Error('数据格式错误');
+                }
+            } catch (error) {
+                console.error('加载图谱失败:', error);
+                container.innerHTML = `
+                    <div class="error" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; text-align: center;">
+                        ❌ 加载图谱失败: ${error.message}
+                        <br><br>
+                        请确保 dashboard_server.py 已启动
+                    </div>
+                `;
+            }
+        }
+
+        // 渲染图谱可视化
+        function renderGraphVisualization(data) {
+            if (!data.nodes || !data.relationships) {
+                const container = document.getElementById('graph-visualization');
+                container.innerHTML = '<div class="loading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">📭 暂无图数据</div>';
+                return;
+            }
+
+            // 转换节点数据为 Vis.js 格式
+            const nodes = data.nodes.map(node => {
+                const isUserNode = node.name.startsWith('user_id:');
+                return {
+                    id: node.name,  // 使用 name 作为唯一标识
+                    label: node.name,
+                    title: `ID: ${node.id || 'N/A'}\n用户: ${node.user_id}\n提及: ${node.mentions}次\n创建: ${node.created}`,
+                    color: {
+                        background: isUserNode ? '#FB7E81' : '#97C2FC',
+                        border: isUserNode ? '#E85256' : '#2B7CE9',
+                        highlight: {
+                            background: isUserNode ? '#FF9B9D' : '#B3D4FF',
+                            border: isUserNode ? '#FF4448' : '#1A5FCC'
+                        }
+                    },
+                    font: {
+                        size: 16,
+                        color: '#333'
+                    },
+                    shape: isUserNode ? 'box' : 'circle',
+                    value: node.mentions,  // 节点大小根据提及次数
+                    borderWidth: 2
+                };
+            });
+
+            // 转换关系数据为 Vis.js 格式
+            const edges = data.relationships.map((rel, index) => {
+                // 根据关系类型设置颜色
+                let edgeColor;
+                if (rel.relationship === 'likes') {
+                    edgeColor = '#7BE141';
+                } else if (rel.relationship === 'dislikes') {
+                    edgeColor = '#FFA807';
+                } else {
+                    edgeColor = '#6E6EFD';
+                }
+
+                return {
+                    id: `edge_${index}`,
+                    from: rel.source,
+                    to: rel.destination,
+                    label: rel.relationship,
+                    title: `关系: ${rel.relationship}\n提及: ${rel.mentions}次\n创建: ${rel.created}`,
+                    arrows: {
+                        to: {
+                            enabled: true,
+                            scaleFactor: 0.8
+                        }
+                    },
+                    color: {
+                        color: edgeColor,
+                        highlight: edgeColor,
+                        hover: edgeColor
+                    },
+                    font: {
+                        size: 12,
+                        align: 'middle',
+                        background: 'white',
+                        strokeWidth: 2,
+                        strokeColor: 'white'
+                    },
+                    width: 2,
+                    smooth: {
+                        type: 'curvedCW',
+                        roundness: 0.2
+                    }
+                };
+            });
+
+            // 创建网络图数据
+            const networkData = {
+                nodes: new vis.DataSet(nodes),
+                edges: new vis.DataSet(edges)
+            };
+
+            // 配置选项
+            const options = {
+                nodes: {
+                    scaling: {
+                        min: 20,
+                        max: 50,
+                        label: {
+                            enabled: true,
+                            min: 14,
+                            max: 20
+                        }
+                    }
+                },
+                edges: {
+                    scaling: {
+                        min: 1,
+                        max: 5
+                    }
+                },
+                physics: {
+                    enabled: true,
+                    stabilization: {
+                        enabled: true,
+                        iterations: 200
+                    },
+                    barnesHut: {
+                        gravitationalConstant: -8000,
+                        centralGravity: 0.3,
+                        springLength: 150,
+                        springConstant: 0.04,
+                        damping: 0.09,
+                        avoidOverlap: 0.5
+                    }
+                },
+                interaction: {
+                    hover: true,
+                    tooltipDelay: 100,
+                    zoomView: true,
+                    dragView: true,
+                    navigationButtons: true,
+                    keyboard: {
+                        enabled: true
+                    }
+                },
+                layout: {
+                    improvedLayout: true,
+                    hierarchical: false
+                }
+            };
+
+            // 清空容器
+            const container = document.getElementById('graph-visualization');
+            container.innerHTML = '';
+
+            // 创建网络图
+            networkInstance = new vis.Network(container, networkData, options);
+
+            // 添加事件监听
+            networkInstance.on('click', function(params) {
+                if (params.nodes.length > 0) {
+                    console.log('点击节点:', params.nodes[0]);
+                }
+                if (params.edges.length > 0) {
+                    console.log('点击边:', params.edges[0]);
+                }
+            });
+
+            // 稳定后适应视图
+            networkInstance.once('stabilized', function() {
+                networkInstance.fit({
+                    animation: {
+                        duration: 1000,
+                        easingFunction: 'easeInOutQuad'
+                    }
+                });
+            });
+        }
+
+        // 适应视图
+        function fitGraphView() {
+            if (networkInstance) {
+                networkInstance.fit({
+                    animation: {
+                        duration: 500,
+                        easingFunction: 'easeInOutQuad'
+                    }
+                });
+            }
+        }
+
+        // 重新布局
+        function resetGraphPhysics() {
+            if (networkInstance) {
+                networkInstance.stabilize();
+            }
+        }
+
+        // 切换物理引擎
+        function togglePhysics() {
+            if (networkInstance) {
+                physicsEnabled = !physicsEnabled;
+                networkInstance.setOptions({ physics: { enabled: physicsEnabled } });
+                
+                // 显示提示
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = physicsEnabled ? '⚙️ 物理引擎：开' : '⚙️ 物理引擎：关';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 1500);
+            }
+        }
+
+        // 导出图片
+        function exportGraphImage() {
+            if (networkInstance) {
+                try {
+                    // 使用 Vis.js 的 canvas 导出功能
+                    const canvas = document.querySelector('#graph-visualization canvas');
+                    if (canvas) {
+                        canvas.toBlob(function(blob) {
+                            const url = URL.createObjectURL(blob);
+                            const link = document.createElement('a');
+                            link.download = `knowledge-graph-${new Date().getTime()}.png`;
+                            link.href = url;
+                            link.click();
+                            URL.revokeObjectURL(url);
+                        });
+                    }
+                } catch (error) {
+                    alert('导出图片失败: ' + error.message);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

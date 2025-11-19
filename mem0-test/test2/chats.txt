@@ -1,0 +1,3 @@
+[{"role": "user", "content": "你好啊，我喜欢吃苹果，因为苹果很甜。"},{"role": "assistant", "content": "明白了"}]
+[{"role": "user", "content": "hello，咱们聊聊天。我喜欢吃香蕉，因为香蕉有能量。"},{"role": "assistant", "content": "明白了"}]
+[{"role": "user", "content": "我也非常喜欢吃橘子，因为橘子富含营养。"},{"role": "assistant", "content": "明白了"}]

@@ -1,0 +1,16 @@
+# Mem0 HTTP 服务器依赖包
+
+# Web 框架
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+pydantic>=2.0.0
+
+# Mem0 核心（应该已经安装）
+mem0ai>=1.0.0
+
+# Azure OpenAI 支持（应该已经安装）
+openai>=1.0.0
+
+# API 客户端测试依赖
+requests>=2.31.0
+

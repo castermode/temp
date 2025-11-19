@@ -1,0 +1,4 @@
+[{"role": "user", "content": "我喜欢吃苹果"},{"role": "assistant", "content": "明白了"}]
+[{"role": "user", "content": "我喜欢吃香蕉"},{"role": "assistant", "content": "明白了"}]
+[{"role": "user", "content": "我喜欢吃橘子"},{"role": "assistant", "content": "明白了"}]
+[{"role": "user", "content": "我不喜欢吃苹果"},{"role": "assistant", "content": "明白了"}]

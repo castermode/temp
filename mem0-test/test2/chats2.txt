@@ -1,0 +1,1 @@
+[{"role": "user", "content": "我不喜欢吃苹果了"},{"role": "assistant", "content": "明白了"}]
